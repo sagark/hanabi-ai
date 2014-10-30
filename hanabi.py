@@ -18,9 +18,11 @@ HANABI_SUIT = [1,1,1,2,2,3,3,4,4,5]
 CARDS_PER_PLAYER = {2:5,3:5,4:4,5:4}
 
 class Card:
-	""" A card in Hanabi """
+	""" A card in Hanabi 
+	
+	A Hanabi card has a color and number
+	"""
 	def __init__(self, color, number):
-		""" A Hanabi card has a color and number """
 		self.color = color
 		self.number = number
 
@@ -29,13 +31,13 @@ class Card:
 
 class Guess:
 	""" Represents a players guess about a particular card """
-	def __init__(self):
-		self.possible_colors = HANABI_COLORS
+	def __init__(self, possible_colors=None, possible_numbers=None):
+		self.possible_colors = possible_colors if possible_colors else HANABI_COLORS
 		# WARNING: CODE DUMPLICATION
-		self.possible_numbers = set(HANABI_SUIT)
+		self.possible_numbers = possible_numers if possible_numbers else list(set(HANABI_SUIT))
 
-	def __str__(self):
-		return "{}\t{}".format(self.possible_colors, self.possible_numbers)
+	def __repr__(self):
+		return "Guess({},{})".format(self.possible_colors, self.possible_numbers)
 
 class Deck:
 	""" A deck of cards """
@@ -84,7 +86,8 @@ class Player:
 		self.guesses = [Guess() for c in self.cards]
 
 	def __str__(self):
-		lines = ["card: {}\tguess: {}".format(card, guess) for card, guess in zip(self.cards, self.guesses) ]
+		# on each line, print the actual card and guess for that card
+		lines = ["{}\t{}".format(card, guess) for card, guess in zip(self.cards, self.guesses) ]
 		return "\n".join(lines)
 
 class Game:
@@ -117,5 +120,5 @@ class Game:
 		self.printHeader("Deck")
 		print str(self.deck)
 
-game = Game(4)
+game = Game(3)
 game.show()
