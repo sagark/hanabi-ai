@@ -7,6 +7,7 @@ Note these are not unit tests as there is currently no way to control specifics 
 '''
 
 from hanabi import *
+from strategies import *
 
 def testPlayCard():
 	''' Tests whether players can play cards on the table '''
@@ -27,3 +28,17 @@ def testPlayCard():
 def testShowGame():
 	game = Game(3)
 	game.show()
+
+
+def testInteractiveStrategy():
+	# game loop:
+	game = Game(3)
+	game.strategy = InteractiveStrategy()
+	gameOver = game.isGameOver()
+	while (not gameOver):
+		game.doTurn()
+		# game.show()
+		gameOver = game.isGameOver()
+	game.doGameOver(gameOver)
+
+testInteractiveStrategy()

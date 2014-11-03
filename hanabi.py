@@ -4,6 +4,7 @@
 
 from collections import defaultdict
 import random
+import re
 import logging 
 
 logging.basicConfig()
@@ -45,6 +46,18 @@ class Guess:
 		# WARNING: CODE DUMPLICATION
 		self.possible_numbers = possible_numers if possible_numbers else list(set(HANABI_SUIT))
 
+	def setIsColor(self, color):
+		self.possible_colors = [color]
+
+	def setIsNotColor(self, color):
+		self.possible_colors = [c for c in self.possible_colors if c != color]
+
+	def setIsNumber(self, number):
+		self.possible_numbers = [number]
+
+	def setIsNotNumber(self, number):
+		self.possible_numbers = [n for n in self.possible_numbers if n != number]
+	
 	def __repr__(self):
 		return "Guess({},{})".format(self.possible_colors, self.possible_numbers)
 
@@ -64,7 +77,7 @@ class Deck:
 		Returns
 		card
 		"""
-		return self.drawCard(1)[0]
+		return self.drawCards(1)[0]
 
 	def drawCards(self,n):
 		""" Draw n cards from the top of the deck 
@@ -99,7 +112,17 @@ class Player:
 		''' Play a card at index i on table t'''
 		logger.debug("{} playing {}".format(self.name, self.cards[i]))
 		t.playCard(self.cards[i])
+		self.removeCard(i)
+
+	def removeCard(self, i):
 		del self.cards[i]
+		del self.guesses[i]
+
+	def discard(self, i, t):
+		logger.debug("{} discarding {}".format(self.name, self.cards[i]))
+		t.discard(self.cards[i])
+		self.removeCard(i)
+
 
 	def getPlayableCards(self, table):
 		''' Return the indices of all playable card in this hand '''
@@ -107,6 +130,27 @@ class Player:
 
 	def drawCard(self, deck):
 		self.cards.append(deck.drawCard())
+		self.guesses.append(Guess())
+
+	def receiveColorInfo(self, color):
+		''' Another player has told this player about all cards of a particular color.
+
+		Update all guesses to reflect this information'''
+		for guess, actual in zip(self.guesses,self.cards):
+			if actual.color == color:
+				guess.setIsColor(color)
+			else:
+				guess.setIsNotColor(color)
+
+	def receiveNumberInfo(self, number):
+		''' Another player has told this player about all cards of a particular number.
+
+		Update all guesses to reflect this information'''
+		for guess, actual in zip(self.guesses,self.cards):
+			if actual.number == number:
+				guess.setIsNumber(number)
+			else:
+				guess.setIsNotNumber(number)
 
 	def __str__(self):
 		# on each line, print the actual card and guess for that card
@@ -116,12 +160,13 @@ class Player:
 
 class Table:
 	""" Represents the game table, e.g. the area where cards are played """
-	def __init__(self, data=None):
+	def __init__(self, data=defaultdict(list),num_fuse_tokens=INITIAL_NUM_FUSE_TOKENS,
+		num_clock_tokens=INITIAL_NUM_CLOCK_TOKENS,discard_pile=[]):
 		# data is a map from color -> cards
-		if data:
-			self.data = data
-		else:
-			self.data = defaultdict(list)
+		self.data = data;
+		self.num_fuse_tokens = num_fuse_tokens
+		self.num_clock_tokens = num_clock_tokens
+		self.discard_pile = discard_pile
 
 	def playCard(self, card):
 		""" Plays a card on the table, assuming it is valid.
@@ -129,17 +174,27 @@ class Table:
 		If not valid, throw exception
 		"""
 		if not self.canPlayCard(card):
-			raise Exception("playCard invalid card: {}, current table is {}".format(card, self))
-		self.data[card.color].append(card)
+			self.num_fuse_tokens -= 1
+			logger.debug("***BOOM*** Booms left: {}".format(self.num_fuse_tokens))
+			self.discard(card)
+		else:
+			self.data[card.color].append(card)
 
 	def canPlayCard(self, card):
 		color = card.color
 		number = card.number
 		num_cards_in_color = len(self.data[color])
-		return num_cards_in_color + 1 == number
+		return (num_cards_in_color + 1) == number
+
+	def discard(self, card):
+		self.discard_pile.append(card)
+
+	def getScore(self):
+		return sum((sum(x) for x in self.data.values()))
 
 	def __repr__(self):
-		return "Table(data={})".format(self.data)
+		return "Table(data={},num_fuse_tokens={},num_clock_tokens={},discard_pile={})".format(self.data,self.num_fuse_tokens,
+			self.num_clock_tokens, self.discard_pile)
 
 class Game:
 	def __init__(self, n_players):
@@ -154,15 +209,78 @@ class Game:
 		self.players = []
 
 		# Game is over is num fuse or num clock tokens goes below zero
-		self.num_fuse_tokens = INITIAL_NUM_FUSE_TOKENS
-		self.num_clock_tokens = INITIAL_NUM_CLOCK_TOKENS
-
 		self.cur_player = 0
-		self.discard_pile = []
+		
 		self.table = Table()
-
+		self.num_turns_left = None 
 		for i in xrange(n_players):
 			self.players.append(Player(self.deck.drawCards(CARDS_PER_PLAYER[n_players]), "player {}".format(i)))
+
+	def doTurn(self):
+		if self.strategy is None:
+			raise Exception("doTurn called but no player strategy specified")
+		# do the turn
+		other_players = [p for i,p in enumerate(self.players) if i != self.cur_player]
+		command = self.strategy.doTurn(self.cur_player, self.players[self.cur_player].guesses,
+			other_players, self.table)
+
+		method, params = re.match(r"(.+)\((.+)\)",command).groups()
+		if method == "sayColor":
+			idx,color = params.split(',')
+			idx = int(idx)
+			self.players[idx].receiveColorInfo(color)
+			self.table.num_clock_tokens -= 1
+		elif method == "sayNumber":
+			idx,num = [int(x) for x in params.split(',')]
+			self.players[idx].receiveNumberInfo(num)
+			self.table.num_clock_tokens -= 1
+		elif method == "discard":
+			idx = int(params)
+			self.players[self.cur_player].discard(idx, self.table)
+			self.players[self.cur_player].drawCard(self.deck)
+		elif method == "play":
+			idx = int(params)
+			self.players[self.cur_player].play(idx, self.table)
+			self.players[self.cur_player].drawCard(self.deck)
+		else:
+			raise Exception("Invalid command retured from strategy.doTurn: {}", command)
+
+
+		# current player draw card
+		# check if deck is empty, if so, don't draw, instead start countdown
+		if self.deck.isEmpty():
+			if self.num_turns_left is None:
+				self.num_turns_left = len(self.players)
+			else:
+				self.num_turns_left -= 1
+		else:
+			self.players[self.cur_player].drawCard(self.deck)
+
+		self.cur_player += 1
+		self.cur_player %= len(self.players)
+
+	def isGameOver(self):
+		''' Check whether game is over
+
+		Ways game can be over:
+		deck is empty and n_players moves have been executed
+
+
+		Returns:
+		None if game is not over
+		String explaining game over reason is over'''
+		if self.num_turns_left is not None and self.num_turns_left == 0:
+			return "Deck is empty and out of turns"
+		if self.table.num_clock_tokens < 0:
+			return "Tried to use information when no information was left"
+		if self.table.num_fuse_tokens < 0:
+			return "Explosion when no fuse tokens left"
+		return None
+
+	def doGameOver(self, reason):
+		self.printHeader("Game Over")
+		print "reason: {}".format(reason)
+		print "score: {}".format(self.table.getScore())
 
 	def printHeader(self, header):
 		separator = "*" * 40
@@ -185,9 +303,7 @@ class Game:
 
 		print
 		print "cur_player: {}".format(self.cur_player)
-		print "discard pile: {}".format(self.discard_pile)
-		print "num_fuse_tokens: {}".format(self.num_fuse_tokens)
-		print "num_clock_tokens: {}".format(self.num_clock_tokens)
+		
 		self.printHeader("END GAME STATE")
 		print
 
