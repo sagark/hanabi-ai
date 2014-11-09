@@ -190,7 +190,9 @@ class Table:
 		self.discard_pile.append(card)
 
 	def getScore(self):
-		return sum((sum(x) for x in self.data.values()))
+		print "getScore: ", self.data.values()
+		numbers_for_colors = ((c.number for c in cards) for cards in self.data.values())
+		return sum((sum(x) for x in numbers_for_colors))
 
 	def __repr__(self):
 		return "Table(data={},num_fuse_tokens={},num_clock_tokens={},discard_pile={})".format(self.data,self.num_fuse_tokens,
@@ -216,6 +218,18 @@ class Game:
 		for i in xrange(n_players):
 			self.players.append(Player(self.deck.drawCards(CARDS_PER_PLAYER[n_players]), "player {}".format(i)))
 
+	def say(self, idx, param):
+		try:
+			number = int(param)
+			print "number"
+			self.players[idx].receiveNumberInfo(param)
+		except ValueError:
+			print "color"
+			self.players[idx].receiveColorInfo(param)
+			
+		self.table.num_clock_tokens -= 1
+
+
 	def doTurn(self):
 		if self.strategy is None:
 			raise Exception("doTurn called but no player strategy specified")
@@ -225,15 +239,10 @@ class Game:
 			other_players, self.table)
 
 		method, params = re.match(r"(.+)\((.+)\)",command).groups()
-		if method == "sayColor":
+		if method.startswith("say"):
 			idx,color = params.split(',')
-			idx = int(idx)
-			self.players[idx].receiveColorInfo(color)
-			self.table.num_clock_tokens -= 1
-		elif method == "sayNumber":
-			idx,num = [int(x) for x in params.split(',')]
-			self.players[idx].receiveNumberInfo(num)
-			self.table.num_clock_tokens -= 1
+			self.say(int(idx), color)
+			print "say"
 		elif method == "discard":
 			idx = int(params)
 			self.players[self.cur_player].discard(idx, self.table)

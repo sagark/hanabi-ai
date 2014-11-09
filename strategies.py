@@ -17,7 +17,6 @@ class InteractiveStrategy:
 		discard(index)
 		play(index)
 		'''
-		from sys import stdin
 		print
 		print "*" * 80
 		print
@@ -29,10 +28,10 @@ class InteractiveStrategy:
 			print str(p)
 		print "table: ", table
 		print "your move, player {}:".format(player_num)
-		action = stdin.readline().strip()
+		action = raw_input()
 		method, params = re.match(r"(.+)\((.+)\)",action).groups()
 		method = method.strip()
-		commands = ["sayColor", "sayNumber","discard","play"]
+		commands = ["sayColor", "sayNumber","discard","play","say"]
 		while method not in commands:
 			print "Invalid command {}, try one of {}".format(method, commands)
 			action = stdin.readline()
