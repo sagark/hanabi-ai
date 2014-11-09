@@ -11,16 +11,12 @@ logging.basicConfig()
 logger = logging.getLogger('hanabi')
 logger.setLevel(logging.DEBUG)
 
-# Components
-# Deck
-# Card
-# Player
-# Game
-# Strategy
+# TODO: MAKE COLORS AND MOVES ENUMS OR CONSTANTS
 
 # Globals specific to game
 HANABI_COLORS = ["red", "blue", "green", "yellow", "white"]
 HANABI_SUIT = [1,1,1,2,2,3,3,4,4,5]
+N_CARDS_PER_SUIT = len(set(HANABI_SUIT))
 # If there are 2 or 3 players, each player receives 5 cards. If there are 4 or 5 players, each player receives 4 cards.
 CARDS_PER_PLAYER = {2:5,3:5,4:4,5:4}
 
@@ -37,11 +33,19 @@ class Card:
 		self.color = color
 		self.number = number
 
+	def __eq__(self, other):
+		return self.number == other.number and self.color == other.color
+
 	def __repr__(self):
 		return "Card({},{})".format(self.color, self.number)
 
 class Guess:
-	""" Represents a players guess about a particular card """
+	""" Represents a players guess about a particular card 
+
+		fields:
+		possible_colors
+		possible_numbers
+	"""
 	def __init__(self, possible_colors=None, possible_numbers=None):
 		self.possible_colors = possible_colors if possible_colors else HANABI_COLORS
 		# WARNING: CODE DUMPLICATION
@@ -160,10 +164,10 @@ class Player:
 
 class Table:
 	""" Represents the game table, e.g. the area where cards are played """
-	def __init__(self, data=None,num_fuse_tokens=INITIAL_NUM_FUSE_TOKENS,
+	def __init__(self, cards_on_table=None,num_fuse_tokens=INITIAL_NUM_FUSE_TOKENS,
 		num_clock_tokens=INITIAL_NUM_CLOCK_TOKENS,discard_pile=None):
 		# data is a map from color -> cards
-		self.data = defaultdict(list) if not data else data
+		self.cards_on_table = {c: [] for c in HANABI_COLORS}
 		self.num_fuse_tokens = num_fuse_tokens
 		self.num_clock_tokens = num_clock_tokens
 		self.discard_pile = [] if not discard_pile else discard_pile
@@ -178,33 +182,31 @@ class Table:
 			logger.debug("***BOOM*** Booms left: {}".format(self.num_fuse_tokens))
 			self.discard(card)
 		else:
-			self.data[card.color].append(card)
+			self.cards_on_table[card.color].append(card)
 
 	def canPlayCard(self, card):
-		color = card.color
-		number = card.number
-		playableCards = self.getPlayableCards()
-		return color in playableCards and playableCards[color] == number
+		playable_cards = self.getPlayableCards()
+		return card in playable_cards
 
 	def getPlayableCards(self):
-		playableCards = {color:1 for color in HANABI_COLORS}
-		for color, cards in self.data.iteritems():
-			del playableCards[color]
-			nextNumber = len(cards) + 1
-			if nextNumber <= 5:
-				playableCards[color] = len(cards) + 1
-		return playableCards
+		playable_cards = []
+		for color, cards in self.cards_on_table.iteritems():
+			if len(cards) >= N_CARDS_PER_SUIT:
+				continue
+			next_number = len(cards) + 1
+			playable_cards.append(Card(color, next_number))
+		return playable_cards
 
 	def discard(self, card):
 		self.discard_pile.append(card)
 
 	def getScore(self):
-		print "getScore: ", self.data.values()
-		numbers_for_colors = ((c.number for c in cards) for cards in self.data.values())
+		print "getScore: ", self.cards_on_table.values()
+		numbers_for_colors = ((c.number for c in cards) for cards in self.cards_on_table.values())
 		return sum((max(x) for x in numbers_for_colors))
 
 	def __repr__(self):
-		return "Table(data={},num_fuse_tokens={},num_clock_tokens={},discard_pile={})".format(self.data,self.num_fuse_tokens,
+		return "Table(cards_on_table={},num_fuse_tokens={},num_clock_tokens={},discard_pile={})".format(self.cards_on_table,self.num_fuse_tokens,
 			self.num_clock_tokens, self.discard_pile)
 
 class Game:
@@ -259,6 +261,9 @@ class Game:
 		elif method.startswith("say"):
 			idx,arg = params
 			logger.debug("{} says {}({})".format(cur_player_object.name, method,str(params)))
+			if idx == self.cur_player:
+				raise Exception("player {} is trying to tell itself information".format(idx))
+			# TODO: you can never give information about 0 cards. Throw exception
 			self.say(idx, arg)
 		else:
 			raise Exception("Invalid command retured from strategy.doTurn: {}", command)
