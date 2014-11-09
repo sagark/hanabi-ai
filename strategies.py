@@ -1,6 +1,9 @@
 import re
+
+from hanabi import HANABI_COLORS as HANABI_COLORS
+
 class InteractiveStrategy:
-	def doTurn(self, player_num, player_guesses, other_players, table):
+	def doTurn(self, player_num, player_guesses, other_players, table, logger):
 		''' Perform a single turn  
 
 		Params:
@@ -71,5 +74,15 @@ class InteractiveStrategy:
 
 class PlayZerothStrategy:
 	''' A strategy which always plays the zeroth card in its hand '''
-	def doTurn(self, player_num, player_guesses, other_players, table):
+	def doTurn(self, player_num, player_guesses, other_players, table, logger):
 		return "play", 0
+
+
+class Strategy1:
+	''' A strategy which always plays the zeroth card in its hand '''
+	def doTurn(self, player_num, player_guesses, other_players, table, logger):
+		# check if you can play a card
+		playableCards = table.getPlayableCards()
+		logger.debug("playableCards are {}".format(playableCards))
+
+		return "say", (1, "red")

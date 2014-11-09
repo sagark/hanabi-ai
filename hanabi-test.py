@@ -34,8 +34,9 @@ def testStrategy(strategy):
 	# game loop:
 	game = Game(3)
 	game.strategy = strategy
-	game.playEntireGame()
-
+	score = game.playEntireGame()
+	print "final score: ", score
 
 # testStrategy(InteractiveStrategy())
 testStrategy(PlayZerothStrategy())
+# testStrategy(Strategy1())

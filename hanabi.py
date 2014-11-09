@@ -111,7 +111,6 @@ class Player:
 
 	def play(self, i, t):
 		''' Play a card at index i on table t'''
-		logger.debug("{} playing {}".format(self.name, self.cards[i]))
 		t.playCard(self.cards[i])
 		self.removeCard(i)
 
@@ -184,8 +183,17 @@ class Table:
 	def canPlayCard(self, card):
 		color = card.color
 		number = card.number
-		num_cards_in_color = len(self.data[color])
-		return (num_cards_in_color + 1) == number
+		playableCards = self.getPlayableCards()
+		return playableCards[color] == number
+
+	def getPlayableCards(self):
+		playableCards = {color:1 for color in HANABI_COLORS}
+		for color, cards in self.data.iteritems():
+			del playableCards[color]
+			nextNumber = len(cards) + 1
+			if nextNumber <= 5:
+				playableCards[color] = len(cards) + 1
+		return playableCards
 
 	def discard(self, card):
 		self.discard_pile.append(card)
@@ -235,19 +243,23 @@ class Game:
 		# do the turn
 		other_players = [p for i,p in enumerate(self.players) if i != self.cur_player]
 		method, params = self.strategy.doTurn(self.cur_player, self.players[self.cur_player].guesses,
-			other_players, self.table)
-
-		if method.startswith("say"):
-			idx,color = params
-			self.say(idx, color)
-		elif method == "discard":
+			other_players, self.table, logger)
+		cur_player_object = self.players[self.cur_player]
+			
+		if method == "discard":
 			idx = int(params)
-			self.players[self.cur_player].discard(idx, self.table)
-			self.players[self.cur_player].drawCard(self.deck)
+			logger.debug("{} discarding {}".format(cur_player_object.name, cur_player_object.cards[idx]))
+			cur_player_object.discard(idx, self.table)
+			cur_player_object.drawCard(self.deck)
 		elif method == "play":
 			idx = int(params)
-			self.players[self.cur_player].play(idx, self.table)
-			self.players[self.cur_player].drawCard(self.deck)
+			logger.debug("{} playing {}".format(cur_player_object.name, cur_player_object.cards[idx]))
+			cur_player_object.play(idx, self.table)
+			cur_player_object.drawCard(self.deck)
+		elif method.startswith("say"):
+			idx,arg = params
+			logger.debug("{} says {}({})".format(cur_player_object.name, method,str(params)))
+			self.say(idx, arg)
 		else:
 			raise Exception("Invalid command retured from strategy.doTurn: {}", command)
 
@@ -280,12 +292,13 @@ class Game:
 			self.gameOverReason = "Tried to use information when no information was left"
 		if self.table.num_fuse_tokens < 0:
 			self.gameOverReason = "Explosion when no fuse tokens left"
+		if len(self.table.getPlayableCards()) == 0:
+			self.gameOverReason = "****YOU GOT A PERFECT SCORE****"
 		return self.gameOverReason
 
 	def doGameOver(self):
 		self.printHeader("Game Over")
 		print "reason: {}".format(self.gameOverReason)
-		print "score: {}".format(self.table.getScore())
 
 	def printHeader(self, header):
 		separator = "*" * 40
@@ -324,4 +337,5 @@ class Game:
 		while (not self.isGameOver()):
 			self.doTurn()
 		self.doGameOver()
+		return self.table.getScore()
 
