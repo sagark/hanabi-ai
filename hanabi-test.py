@@ -37,6 +37,22 @@ def testStrategy(strategy):
 	score = game.playEntireGame()
 	print "final score: ", score
 
+def evaluateStrategy(strategy, n_players):
+	import matplotlib.pyplot as plt
+	import seaborn as sns
+	scores = []
+	for i in xrange(1000):
+		game = Game(n_players)
+		game.strategy = strategy
+		score = game.playEntireGame()
+		scores.append(score)
+	print scores
+	plt.hist(scores)
+	plt.show()
+	
+
+
 # testStrategy(InteractiveStrategy())
-testStrategy(PlayZerothStrategy())
+# testStrategy(PlayZerothStrategy())
 # testStrategy(Strategy1())
+evaluateStrategy(PlayZerothStrategy(), 3)

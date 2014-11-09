@@ -160,13 +160,13 @@ class Player:
 
 class Table:
 	""" Represents the game table, e.g. the area where cards are played """
-	def __init__(self, data=defaultdict(list),num_fuse_tokens=INITIAL_NUM_FUSE_TOKENS,
-		num_clock_tokens=INITIAL_NUM_CLOCK_TOKENS,discard_pile=[]):
+	def __init__(self, data=None,num_fuse_tokens=INITIAL_NUM_FUSE_TOKENS,
+		num_clock_tokens=INITIAL_NUM_CLOCK_TOKENS,discard_pile=None):
 		# data is a map from color -> cards
-		self.data = data;
+		self.data = defaultdict(list) if not data else data
 		self.num_fuse_tokens = num_fuse_tokens
 		self.num_clock_tokens = num_clock_tokens
-		self.discard_pile = discard_pile
+		self.discard_pile = [] if not discard_pile else discard_pile
 
 	def playCard(self, card):
 		""" Plays a card on the table, assuming it is valid.
@@ -184,7 +184,7 @@ class Table:
 		color = card.color
 		number = card.number
 		playableCards = self.getPlayableCards()
-		return playableCards[color] == number
+		return color in playableCards and playableCards[color] == number
 
 	def getPlayableCards(self):
 		playableCards = {color:1 for color in HANABI_COLORS}
@@ -201,7 +201,7 @@ class Table:
 	def getScore(self):
 		print "getScore: ", self.data.values()
 		numbers_for_colors = ((c.number for c in cards) for cards in self.data.values())
-		return sum((sum(x) for x in numbers_for_colors))
+		return sum((max(x) for x in numbers_for_colors))
 
 	def __repr__(self):
 		return "Table(data={},num_fuse_tokens={},num_clock_tokens={},discard_pile={})".format(self.data,self.num_fuse_tokens,

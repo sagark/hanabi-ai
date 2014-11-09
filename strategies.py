@@ -84,5 +84,8 @@ class Strategy1:
 		# check if you can play a card
 		playableCards = table.getPlayableCards()
 		logger.debug("playableCards are {}".format(playableCards))
+		logger.debug("guesses are {}".format(str(player_guesses)))
+
+
 
 		return "say", (1, "red")
