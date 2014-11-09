@@ -25,7 +25,8 @@ HANABI_SUIT = [1,1,1,2,2,3,3,4,4,5]
 CARDS_PER_PLAYER = {2:5,3:5,4:4,5:4}
 
 INITIAL_NUM_CLOCK_TOKENS = 8
-INITIAL_NUM_FUSE_TOKENS = 4
+INITIAL_NUM_FUSE_TOKENS = 3
+# INITIAL_NUM_FUSE_TOKENS = 0
 
 class Card:
 	""" A card in Hanabi 
@@ -221,10 +222,8 @@ class Game:
 	def say(self, idx, param):
 		try:
 			number = int(param)
-			print "number"
-			self.players[idx].receiveNumberInfo(param)
+			self.players[idx].receiveNumberInfo(number)
 		except ValueError:
-			print "color"
 			self.players[idx].receiveColorInfo(param)
 			
 		self.table.num_clock_tokens -= 1
@@ -235,14 +234,12 @@ class Game:
 			raise Exception("doTurn called but no player strategy specified")
 		# do the turn
 		other_players = [p for i,p in enumerate(self.players) if i != self.cur_player]
-		command = self.strategy.doTurn(self.cur_player, self.players[self.cur_player].guesses,
+		method, params = self.strategy.doTurn(self.cur_player, self.players[self.cur_player].guesses,
 			other_players, self.table)
 
-		method, params = re.match(r"(.+)\((.+)\)",command).groups()
 		if method.startswith("say"):
-			idx,color = params.split(',')
-			self.say(int(idx), color)
-			print "say"
+			idx,color = params
+			self.say(idx, color)
 		elif method == "discard":
 			idx = int(params)
 			self.players[self.cur_player].discard(idx, self.table)
@@ -262,8 +259,6 @@ class Game:
 				self.num_turns_left = len(self.players)
 			else:
 				self.num_turns_left -= 1
-		else:
-			self.players[self.cur_player].drawCard(self.deck)
 
 		self.cur_player += 1
 		self.cur_player %= len(self.players)
@@ -278,17 +273,18 @@ class Game:
 		Returns:
 		None if game is not over
 		String explaining game over reason is over'''
+		self.gameOverReason = None
 		if self.num_turns_left is not None and self.num_turns_left == 0:
-			return "Deck is empty and out of turns"
+			self.gameOverReason = "Deck is empty and out of turns"
 		if self.table.num_clock_tokens < 0:
-			return "Tried to use information when no information was left"
+			self.gameOverReason = "Tried to use information when no information was left"
 		if self.table.num_fuse_tokens < 0:
-			return "Explosion when no fuse tokens left"
-		return None
+			self.gameOverReason = "Explosion when no fuse tokens left"
+		return self.gameOverReason
 
-	def doGameOver(self, reason):
+	def doGameOver(self):
 		self.printHeader("Game Over")
-		print "reason: {}".format(reason)
+		print "reason: {}".format(self.gameOverReason)
 		print "score: {}".format(self.table.getScore())
 
 	def printHeader(self, header):
@@ -315,4 +311,17 @@ class Game:
 		
 		self.printHeader("END GAME STATE")
 		print
+
+	def playEntireGame(self):
+		''' Plays the entire game assuming a strategy is set
+
+		1. Check if strategy is set
+		2. Loop and play game until game is over
+		'''
+		if not self.strategy:
+			raise Exception ("playEntireGame called but no strategy was set!")
+
+		while (not self.isGameOver()):
+			self.doTurn()
+		self.doGameOver()
 

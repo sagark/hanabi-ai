@@ -30,15 +30,12 @@ def testShowGame():
 	game.show()
 
 
-def testInteractiveStrategy():
+def testStrategy(strategy):
 	# game loop:
 	game = Game(3)
-	game.strategy = InteractiveStrategy()
-	gameOver = game.isGameOver()
-	while (not gameOver):
-		game.doTurn()
-		# game.show()
-		gameOver = game.isGameOver()
-	game.doGameOver(gameOver)
+	game.strategy = strategy
+	game.playEntireGame()
 
-testInteractiveStrategy()
+
+# testStrategy(InteractiveStrategy())
+testStrategy(PlayZerothStrategy())
