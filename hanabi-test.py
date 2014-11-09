@@ -37,17 +37,20 @@ def testStrategy(strategy):
 	score = game.playEntireGame()
 	print "final score: ", score
 
+EVALUATION_TIMES = 10000
 def evaluateStrategy(strategy, n_players):
 	import matplotlib.pyplot as plt
 	import seaborn as sns
+	import numpy as np
 	scores = []
-	for i in xrange(1000):
+	for i in xrange(EVALUATION_TIMES):
 		game = Game(n_players)
 		game.strategy = strategy
 		score = game.playEntireGame()
 		scores.append(score)
 	print scores
-	plt.hist(scores)
+	bins = np.linspace(0,25,26)
+	plt.hist(scores, bins)
 	plt.show()
 	
 
@@ -55,4 +58,5 @@ def evaluateStrategy(strategy, n_players):
 # testStrategy(InteractiveStrategy())
 # testStrategy(PlayZerothStrategy())
 # testStrategy(Strategy1())
-evaluateStrategy(PlayZerothStrategy(), 3)
+# evaluateStrategy(PlayZerothStrategy(), 3)
+testStrategy(Strategy1())

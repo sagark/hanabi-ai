@@ -106,12 +106,13 @@ class Deck:
 
 class Player:
 	""" A player in Hanabi """
-	def __init__(self, cards, name):
+	def __init__(self, cards, name, index):
 		# cards in hand
 		self.cards = cards
 		# guesses about cards
 		self.guesses = [Guess() for c in self.cards]
 		self.name = name
+		self.index = index
 
 	def play(self, i, t):
 		''' Play a card at index i on table t'''
@@ -201,9 +202,9 @@ class Table:
 		self.discard_pile.append(card)
 
 	def getScore(self):
-		print "getScore: ", self.cards_on_table.values()
-		numbers_for_colors = ((c.number for c in cards) for cards in self.cards_on_table.values())
-		return sum((max(x) for x in numbers_for_colors))
+		print "getScore: ", self.cards_on_table
+		numbers_for_colors = ([c.number for c in cards] for cards in self.cards_on_table.values())
+		return sum((max(x) if len(x) > 0 else 0 for x in numbers_for_colors))
 
 	def __repr__(self):
 		return "Table(cards_on_table={},num_fuse_tokens={},num_clock_tokens={},discard_pile={})".format(self.cards_on_table,self.num_fuse_tokens,
@@ -227,7 +228,7 @@ class Game:
 		self.table = Table()
 		self.num_turns_left = None 
 		for i in xrange(n_players):
-			self.players.append(Player(self.deck.drawCards(CARDS_PER_PLAYER[n_players]), "player {}".format(i)))
+			self.players.append(Player(self.deck.drawCards(CARDS_PER_PLAYER[n_players]), "player {}".format(i), i ))
 
 	def say(self, idx, param):
 		try:

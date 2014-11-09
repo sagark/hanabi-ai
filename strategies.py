@@ -9,7 +9,13 @@ class InteractiveStrategy:
 		Params:
 		player_num -- number of player for current turn
 		player_guesses -- guesses for the current player
-		other_players -- state of other players
+		other_players -- list of Player objects, with state of other players
+
+		Player Object fields:
+		cards = cards
+		guesses = [Guess() for c in self.cards]
+		name -- player name
+		index -- index of player (use to refer in 'say')
 
 		Returns:
 		(method, params) tuple
@@ -72,6 +78,20 @@ class InteractiveStrategy:
 					errorMessage = "Argument to {} must of form (player_index, info)".format(method)
 				return method, (idx, param)
 
+def printState(player_num, player_guesses, other_players, table, logger):
+	print
+	print "*" * 80
+	print "player {}".format(player_num)
+	print "*" * 80	
+	print
+	print "player_guesses:"
+	for i,g in enumerate(player_guesses):
+		print i, g
+	print "other_players:"
+	for p in other_players:
+		print str(p)
+	print "table: ", table
+
 class PlayZerothStrategy:
 	''' A strategy which always plays the zeroth card in its hand '''
 	def doTurn(self, player_num, player_guesses, other_players, table, logger):
@@ -81,11 +101,45 @@ class PlayZerothStrategy:
 class Strategy1:
 	''' A strategy which always plays the zeroth card in its hand '''
 	def doTurn(self, player_num, player_guesses, other_players, table, logger):
-		# check if you can play a card
-		playableCards = table.getPlayableCards()
-		logger.debug("playableCards are {}".format(playableCards))
-		logger.debug("guesses are {}".format(str(player_guesses)))
+		# print the game state
+		printState(player_num, player_guesses, other_players, table, logger)
+
+		#######################################################################
+		# Check if you can play a card
+		#######################################################################
+		
+		# playable cards: [Card(color, number), Card(color, number)]
+		playable_cards = table.getPlayableCards()
+
+		guess_list = [(i,g.possible_colors, g.possible_numbers) for i,g in enumerate(player_guesses)]
+	
+		for i, colors_for_guess, numbers_for_guess in guess_list:					
+			# there is only one number
+			# A possible card matches if its number matches the guessed number AND its color is one of the possible colors
+			matching_cards = [ x for x in playable_cards if x.number in numbers_for_guess and x.color in colors_for_guess ]
+			num_possible_cards_for_guess = len(colors_for_guess) * len(numbers_for_guess)
+			probability_of_match = float(len(matching_cards)) / num_possible_cards_for_guess
+			if probability_of_match >= 1:
+				return "play", i
 
 
+		#######################################################################
+		# Tell someone else about their cards
+		#######################################################################
+		if table.num_clock_tokens > 0:
+			for other_player in other_players:
+				for card, guess in zip(other_player.cards, other_player.guesses):
+					if card in playable_cards:
+						# check if the player alrady knows about it
+						colors_for_card = guess.possible_colors
+						numbers_for_card = guess.possible_numbers
+						if len(colors_for_card) > 1:
+							return "say", (other_player.index, card.color)
+						if len(numbers_for_card) > 1:
+							return "say", (other_player.index, card.number)
 
-		return "say", (1, "red")
+
+		#######################################################################
+		# Discard the oldest card 
+		#######################################################################
+		return "discard", 0
