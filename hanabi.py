@@ -84,6 +84,7 @@ class Deck:
 		"""
 		return self.drawCards(1)[0]
 
+
 	def drawCards(self,n):
 		""" Draw n cards from the top of the deck 
 
@@ -91,7 +92,7 @@ class Deck:
 		[card1, card2, ... , cardn]
 		"""
 		if n > len(self.cards):
-			raise Exception("drawCards({}) called when only {} cards in deck".format(n, len(cards)))
+			raise Exception("drawCards({}) called when only {} cards in deck".format(n, len(self.cards) ))
 		if n < 0:
 			raise Exception("drawCards({}) can't use negative number".format(n))
 		result = self.cards[-n:]
@@ -124,7 +125,6 @@ class Player:
 		del self.guesses[i]
 
 	def discard(self, i, t):
-		logger.debug("{} discarding {}".format(self.name, self.cards[i]))
 		t.discard(self.cards[i])
 		self.removeCard(i)
 
@@ -134,8 +134,9 @@ class Player:
 		return [i for i,card in enumerate(self.cards) if table.canPlayCard(card)]
 
 	def drawCard(self, deck):
-		self.cards.append(deck.drawCard())
-		self.guesses.append(Guess())
+		if not deck.isEmpty() > 0:
+			self.cards.append(deck.drawCard())
+			self.guesses.append(Guess())
 
 	def receiveColorInfo(self, color):
 		''' Another player has told this player about all cards of a particular color.
@@ -261,10 +262,12 @@ class Game:
 			cur_player_object.drawCard(self.deck)
 		elif method.startswith("say"):
 			idx,arg = params
-			logger.debug("{} says {}({})".format(cur_player_object.name, method,str(params)))
+			if self.table.num_clock_tokens == 0:
+				raise Exception("player {} called 'say' with no information tokens left".format(cur_player.index))
 			if idx == self.cur_player:
 				raise Exception("player {} is trying to tell itself information".format(idx))
 			# TODO: you can never give information about 0 cards. Throw exception
+			logger.debug("{} saying {},{}".format(cur_player_object.name, idx, arg))
 			self.say(idx, arg)
 		else:
 			raise Exception("Invalid command retured from strategy.doTurn: {}", command)

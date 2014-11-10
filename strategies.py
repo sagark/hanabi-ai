@@ -99,6 +99,9 @@ class PlayZerothStrategy:
 
 
 class Strategy1:
+	def __init__(self, play_risk):
+		self.play_risk = play_risk
+
 	''' A strategy which always plays the zeroth card in its hand '''
 	def doTurn(self, player_num, player_guesses, other_players, table, logger):
 		# print the game state
@@ -119,7 +122,7 @@ class Strategy1:
 			matching_cards = [ x for x in playable_cards if x.number in numbers_for_guess and x.color in colors_for_guess ]
 			num_possible_cards_for_guess = len(colors_for_guess) * len(numbers_for_guess)
 			probability_of_match = float(len(matching_cards)) / num_possible_cards_for_guess
-			if probability_of_match >= 1:
+			if probability_of_match >= self.play_risk:
 				return "play", i
 
 
