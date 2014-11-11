@@ -185,6 +185,12 @@ class Table:
 			self.discard(card)
 		else:
 			self.cards_on_table[card.color].append(card)
+			if card.number == 5:
+				if self.num_clock_tokens < INITIAL_NUM_CLOCK_TOKENS:
+					self.num_clock_tokens += 1
+
+				logger.debug("***HANABI!!!*** {} clock tokens".format(self.num_clock_tokens))
+
 
 	def canPlayCard(self, card):
 		playable_cards = self.getPlayableCards()

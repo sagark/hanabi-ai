@@ -61,14 +61,14 @@ import numpy as np
 # testStrategy(PlayZerothStrategy())
 # testStrategy(Strategy1())
 # evaluateStrategy(PlayZerothStrategy(), 3)
-# evaluateStrategy(Strategy1(), 3)
-mean_scores = []
-for i in xrange(10, 101, 10):
-	probability = i/100.0
-	scores = evaluateStrategy(Strategy1(probability), 3)
-	mean_scores.append((probability, np.mean(scores)))
+evaluateStrategy(Strategy1(0.4), 3)
+# mean_scores = []
+# for i in xrange(10, 101, 10):
+# 	probability = i/100.0
+# 	scores = evaluateStrategy(Strategy1(probability), 3)
+# 	mean_scores.append((probability, np.mean(scores)))
 
-print mean_scores
+# print mean_scores
 
 
 
