@@ -63,6 +63,12 @@ class Guess:
 	def setIsNotNumber(self, number):
 		self.possible_numbers = [n for n in self.possible_numbers if n != number]
 	
+	def clone(self):
+		result = Guess()
+		result.possible_numbers = list(self.possible_numbers)
+		result.possible_colors = list(self.possible_colors)
+		return result
+
 	def __repr__(self):
 		return "Guess({},{})".format(self.possible_colors, self.possible_numbers)
 
@@ -207,6 +213,7 @@ class Table:
 
 	def discard(self, card):
 		self.discard_pile.append(card)
+		self.num_clock_tokens += 1
 
 	def getScore(self):
 		print "getScore: ", self.cards_on_table
@@ -218,7 +225,7 @@ class Table:
 			self.num_clock_tokens, self.discard_pile)
 
 class Game:
-	def __init__(self, n_players):
+	def __init__(self, n_players, interactive=False):
 		""" Build game of Hanabi
 
 		Args:
@@ -231,6 +238,8 @@ class Game:
 
 		# Game is over is num fuse or num clock tokens goes below zero
 		self.cur_player = 0
+
+		self.interactive = interactive
 		
 		self.table = Table()
 		self.num_turns_left = None 
@@ -305,7 +314,7 @@ class Game:
 			self.gameOverReason = "Deck is empty and out of turns"
 		if self.table.num_clock_tokens < 0:
 			self.gameOverReason = "Tried to use information when no information was left"
-		if self.table.num_fuse_tokens < 0:
+		if self.table.num_fuse_tokens <= 0:
 			self.gameOverReason = "Explosion when no fuse tokens left"
 		if len(self.table.getPlayableCards()) == 0:
 			self.gameOverReason = "****YOU GOT A PERFECT SCORE****"
@@ -314,6 +323,8 @@ class Game:
 	def doGameOver(self):
 		self.printHeader("Game Over")
 		print "reason: {}".format(self.gameOverReason)
+		print
+		print
 
 	def printHeader(self, header):
 		separator = "*" * 40
@@ -351,6 +362,8 @@ class Game:
 
 		while (not self.isGameOver()):
 			self.doTurn()
+			if self.interactive:
+				raw_input()
 		self.doGameOver()
 		return self.table.getScore()
 
