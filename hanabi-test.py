@@ -32,12 +32,12 @@ def testShowGame():
 
 def testStrategy(strategy):
 	# game loop:
-	game = Game(3)
+	game = Game(3, interactive=True)
 	game.strategy = strategy
 	score = game.playEntireGame()
 	print "final score: ", score
 
-EVALUATION_TIMES = 100
+EVALUATION_TIMES = 1000
 def evaluateStrategy(strategy, n_players):
 	import matplotlib.pyplot as plt
 	import seaborn as sns
@@ -48,7 +48,7 @@ def evaluateStrategy(strategy, n_players):
 		game.strategy = strategy
 		score = game.playEntireGame()
 		scores.append(score)
-	print scores
+	print scores, np.mean(scores)
 	bins = np.linspace(0,25,26)
 	plt.hist(scores, bins)
 	plt.show()
@@ -61,7 +61,10 @@ import numpy as np
 # testStrategy(PlayZerothStrategy())
 # testStrategy(Strategy1())
 # evaluateStrategy(PlayZerothStrategy(), 3)
-evaluateStrategy(Strategy1(0.4), 3)
+# evaluateStrategy(Strategy1(0.4), 3)
+# evaluateStrategy(Strategy22(), 3)
+evaluateStrategy(Strategy22(0.4), 3)
+# testStrategy(Strategy22(0.4, print_state=True))
 # mean_scores = []
 # for i in xrange(10, 101, 10):
 # 	probability = i/100.0
