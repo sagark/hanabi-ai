@@ -58,12 +58,9 @@ def evaluateStrategy(strategy, n_players):
 
 # testStrategy(InteractiveStrategy())
 # testStrategy(PlayZerothStrategy())
-# testStrategy(Strategy1())
-# evaluateStrategy(PlayZerothStrategy(), 3)
-# evaluateStrategy(Strategy1(0.4), 3)
-# evaluateStrategy(Strategy22(), 3)
-evaluateStrategy(Strategy22(0.4), 3)
+testStrategy(Strategy1(0.4))
 # testStrategy(Strategy22(0.4, print_state=True))
+
 # mean_scores = []
 # for i in xrange(10, 101, 10):
 # 	probability = i/100.0

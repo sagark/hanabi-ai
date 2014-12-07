@@ -39,6 +39,9 @@ class Card:
     def __repr__(self):
         return "Card({},{})".format(self.color, self.number)
 
+    def __str__(self):
+        return "{}{}".format(self.color[0].upper(), self.number)
+
 class Guess:
     """ Represents a players guess about a particular card
 
@@ -71,6 +74,10 @@ class Guess:
 
     def __repr__(self):
         return "Guess({},{})".format(self.possible_colors, self.possible_numbers)
+
+    def __str__(self):
+        return "{}\t{}".format(",".join([c[0].upper() for c in self.possible_colors]),
+                               ",".join([str(x) for x in self.possible_numbers]))
 
 class Deck:
     """ A deck of cards """
@@ -105,11 +112,16 @@ class Deck:
         del self.cards[-n:]
         return result
 
+    def size(self):
+        return len(self.cards)
+
     def isEmpty(self):
         return len(self.cards) == 0
 
     def __str__(self):
-        return "{}".format(self.cards)
+        return "{} cards\n{}".format(
+            len(self.cards),
+            ",".join([str(c) for c in self.cards]))
 
 class Player:
     """ A player in Hanabi """
@@ -224,6 +236,19 @@ class Table:
         return "Table(cards_on_table={},num_fuse_tokens={},num_clock_tokens={},discard_pile={})".format(self.cards_on_table,self.num_fuse_tokens,
             self.num_clock_tokens, self.discard_pile)
 
+    def show(self):
+        print "fuse tokens left: ", self.num_fuse_tokens
+        print "information tokens left: ", self.num_clock_tokens
+        print
+        row_string = ""
+        for color, cards in self.cards_on_table.iteritems():
+            row_string = color + ":"
+            for card in cards:
+                row_string += "\t{}".format(card.number)
+            if len(cards) == 0:
+                row_string += "\tempty"
+            print row_string
+
 class Game:
     def __init__(self, n_players, interactive=False):
         """ Build game of Hanabi
@@ -334,22 +359,18 @@ class Game:
         print separator
 
     def show(self):
-        self.printHeader("BEGIN GAME STATE")
-        self.printHeader("Players")
+        print "*" * 80
         for p in self.players:
             print str(p)
 
-        self.printHeader("Deck")
+        print
         print self.deck
 
-        self.printHeader("Table")
-        print self.table
+        print
+        self.table.show()
 
         print
-        print "cur_player: {}".format(self.cur_player)
-
-        self.printHeader("END GAME STATE")
-        print
+        print "Current Player: player {}".format(self.cur_player)
 
     def playEntireGame(self):
         ''' Plays the entire game assuming a strategy is set
@@ -361,8 +382,14 @@ class Game:
             raise Exception ("playEntireGame called but no strategy was set!")
 
         while (not self.isGameOver()):
+            if self.interactive:
+                self.show()
+                print "Press enter to view action..."
+                raw_input()
             self.doTurn()
             if self.interactive:
+                print
+                print "Press enter to view new state..."
                 raw_input()
         self.doGameOver()
         return self.table.getScore()

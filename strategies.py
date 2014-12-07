@@ -79,19 +79,7 @@ class InteractiveStrategy:
                 return method, (idx, param)
 
 
-def printState(player_num, player_guesses, other_players, table, logger):
-    print
-    print "*" * 80
-    print "player {}".format(player_num)
-    print "*" * 80
-    print
-    print "player_guesses:"
-    for i, g in enumerate(player_guesses):
-        print i, g
-    print "other_players:"
-    for p in other_players:
-        print str(p)
-    print "table: ", table
+
 
 
 class PlayZerothStrategy:
@@ -111,7 +99,6 @@ class Strategy22:
     def compute_probabilities_of_match(self, playable_cards, player_guesses):
         guess_list = [(i, g.possible_colors, g.possible_numbers) for i, g in enumerate(player_guesses)]
 
-        # print playable_cards
         # for each guess, stores the probability of a match
         probabilities_of_match = []
         for i, colors_for_guess, numbers_for_guess in guess_list:
@@ -125,9 +112,8 @@ class Strategy22:
     ''' A strategy which always plays the zeroth card in its hand '''
 
     def doTurn(self, player_num, player_guesses, other_players, table, logger):
-        # print the game state
-        if self.print_state:
-            printState(player_num, player_guesses, other_players, table, logger)
+        # if self.print_state:
+        #     printState(player_num, player_guesses, other_players, table, logger)
 
         #######################################################################
         # Check if you can play a card
@@ -139,7 +125,6 @@ class Strategy22:
 
         guess_list = [(i, g.possible_colors, g.possible_numbers) for i, g in enumerate(player_guesses)]
 
-        # print playable_cards
         # for each guess, stores the probability of a match
         probabilities_of_match = self.compute_probabilities_of_match(playable_cards, player_guesses)
         for i, colors_for_guess, numbers_for_guess in guess_list:
@@ -303,9 +288,6 @@ class Strategy1:
     ''' A strategy which always plays the zeroth card in its hand '''
 
     def doTurn(self, player_num, player_guesses, other_players, table, logger):
-        # print the game state
-        printState(player_num, player_guesses, other_players, table, logger)
-
         #######################################################################
         # Check if you can play a card
         #######################################################################
@@ -313,11 +295,9 @@ class Strategy1:
         # playable cards: [Card(color, number), Card(color, number)]
         playable_cards = table.getPlayableCards()
         color_to_number = {c.color: c.number for c in playable_cards}
-        print color_to_number
 
         guess_list = [(i, g.possible_colors, g.possible_numbers) for i, g in enumerate(player_guesses)]
 
-        print playable_cards
         for i, colors_for_guess, numbers_for_guess in guess_list:
             matching_cards = [x for x in playable_cards if
                               x.number in numbers_for_guess and x.color in colors_for_guess]
