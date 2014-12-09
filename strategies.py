@@ -90,9 +90,8 @@ class PlayZerothStrategy:
 
 
 class Strategy22:
-    def __init__(self, play_risk, print_state=False):
+    def __init__(self, play_risk):
         self.play_risk = play_risk
-        self.print_state = print_state
 
     # input: playable_cards, player_guesses
     # return: probabilities of match
@@ -112,9 +111,6 @@ class Strategy22:
     ''' A strategy which always plays the zeroth card in its hand '''
 
     def doTurn(self, player_num, player_guesses, other_players, table, logger):
-        # if self.print_state:
-        #     printState(player_num, player_guesses, other_players, table, logger)
-
         #######################################################################
         # Check if you can play a card
         #######################################################################
@@ -136,6 +132,7 @@ class Strategy22:
                 return "play", i
         # find index of highest probability
         max_prob = max(probabilities_of_match)
+        print probabilities_of_match
 
         if max_prob > self.play_risk:
             return "play", probabilities_of_match.index(max_prob)
@@ -172,7 +169,7 @@ class Strategy22:
             # compute info gain for all cards and colors
             for color_info in other_player_colors:
                 cloned_guesses = [guess.clone() for guess in other_player.guesses]
-                for card, guess in zip(other_player.cards, cloned_guesses):
+                for card, guess in reversed(zip(other_player.cards, cloned_guesses)):
                     if card.color == color_info:
                         guess.setIsColor(color_info)
                     else:
@@ -196,7 +193,7 @@ class Strategy22:
             # info_map5[info_gain] = (other_player.index, color_info)
             for number_info in other_player_numbers:
                 cloned_guesses = [guess.clone() for guess in other_player.guesses]
-                for card, guess in zip(other_player.cards, cloned_guesses):
+                for card, guess in reversed(zip(other_player.cards, cloned_guesses)):
                     if card.number == number_info:
                         guess.setIsNumber(number_info)
                     else:
@@ -217,32 +214,7 @@ class Strategy22:
 
                     info_gain += (new_probabilities[i] - p)
 
-                info_map5[sum(new_probabilities) - sum(old_probabilities)].append((other_player.index, number_info))
-            # info_map5[info_gain] = (other_player.index, number_info)
 
-            # for k,v in dbg1.iteritems():
-            # print k
-            # 	guesses, prob = v
-            # 	for g in guesses:
-            # 		print "\t", g, "\t"
-            # 	print "\t", prob
-            # for card, guess in zip(other_player.cards, other_player.guesses):
-            # 	if card.color in color_to_number and color_to_number[card.color] < card.number:
-            # 		continue
-            # 	colors_for_card = guess.possible_colors
-            # 	numbers_for_card = guess.possible_numbers
-
-            # 	info_gain_color = (len(colors_for_card) - 1) * len(numbers_for_card)
-            # 	info_gain_number = (len(numbers_for_card) - 1) * len(numbers_for_card)
-
-            # 	if card in playable_cards:
-            # 		info_gain_playable[info_gain_number].append( (other_player.index, card.number) )
-            # 		info_gain_playable[info_gain_color].append( (other_player.index, card.color) )
-            # 	elif card.number == 5:
-            # 		fives.append(other_player.index, card.number)
-            # 	else:
-            # 		info_gain_non_playable[info_gain_number].append( (other_player.index, card.number) )
-            # 		info_gain_non_playable[info_gain_color].append( (other_player.index, card.color) )
 
 
         #######################################################################
@@ -259,6 +231,7 @@ class Strategy22:
         # 		return "say", info_gain_non_playable[playable_max][0]
         print "info_map2", info_map2
         print "info_map3", info_map3
+        print "info_map4", info_map4
         if table.num_clock_tokens > 0:
             max_probability2 = max(info_map2.keys())
             max_probability3 = max(info_map3.keys())
@@ -268,7 +241,7 @@ class Strategy22:
             if max_probability5 >= 0.0:
                 # for info in info_map5[max_probability5]:
                 # return "say", info_map2[max_probability2]
-                return "say", info_map5[max_probability5][0]
+                return "say", info_map4[max_probability4]
             # return "say", info_map2[max_probability]
 
         #######################################################################
@@ -278,7 +251,7 @@ class Strategy22:
         # for i, colors_for_guess, numbers_for_guess in guess_list:
         # 	if numbers_for_guess[0] == 5 and len(possible_discard_indices) > 0:
         # 		del possible_discard_indices[i]
-        return "discard", possible_discard_indices[0]
+        return "discard", possible_discard_indices[-1]
 
 
 class Strategy1:
