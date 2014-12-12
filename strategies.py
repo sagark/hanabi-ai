@@ -108,6 +108,19 @@ class Strategy22:
             probabilities_of_match.append(probability_of_match)
         return probabilities_of_match
 
+    def compute_probabilities_of_possible_match(self, playable_cards, player_guesses):
+        guess_list = [(i, g.possible_colors, g.possible_numbers) for i, g in enumerate(player_guesses)]
+
+        # for each guess, stores the probability of a match
+        probabilities_of_match = []
+        for i, colors_for_guess, numbers_for_guess in guess_list:
+            matching_cards = [x for x in playable_cards if
+                              any((x.number <= n for n in numbers_for_guess)) and x.color in colors_for_guess]
+            num_possible_cards_for_guess = len(colors_for_guess) * len(numbers_for_guess)
+            probability_of_match = float(len(matching_cards)) / num_possible_cards_for_guess
+            probabilities_of_match.append(probability_of_match)
+        return probabilities_of_match
+
     ''' A strategy which always plays the zeroth card in its hand '''
 
     def doTurn(self, player_num, player_guesses, other_players, table, logger):
@@ -123,19 +136,17 @@ class Strategy22:
 
         # for each guess, stores the probability of a match
         probabilities_of_match = self.compute_probabilities_of_match(playable_cards, player_guesses)
-        for i, colors_for_guess, numbers_for_guess in guess_list:
-            matching_cards = [x for x in playable_cards if
-                              x.number in numbers_for_guess and x.color in colors_for_guess]
-            if len(matching_cards) > 0 and (
-                                len(colors_for_guess) == 1 and matching_cards[0].color == colors_for_guess[0] or len(
-                            numbers_for_guess) == 1 and matching_cards[0].number == numbers_for_guess[0]):
-                return "play", i
+        probabilities_possible_match = self.compute_probabilities_of_possible_match(playable_cards, player_guesses)
+
         # find index of highest probability
         max_prob = max(probabilities_of_match)
-        print probabilities_of_match
+        print "can play card? ", probabilities_of_match
 
         if max_prob > self.play_risk:
             return "play", probabilities_of_match.index(max_prob)
+
+        if 0.0 in probabilities_possible_match and table.num_clock_tokens < 3:
+            return "discard", probabilities_possible_match.index(0.0)
 
 
         #######################################################################
@@ -148,16 +159,10 @@ class Strategy22:
         info_gain_non_playable = defaultdict(list)
         info_gain_playable = defaultdict(list)
 
-        # (player, info) -> maximum of likelihood for hand
-        info_map1 = {}
-        info_map2 = {}
-        info_map3 = {}
-        info_map4 = {}
-        info_map5 = defaultdict(list)
-
+        # probability -> index, info
+        info_map4 = defaultdict(list)
         fives = []
         # player, number -> cloned_guesses
-        dbg1 = {}
 
         for other_player in other_players:
             # info_gain -> (other_player.index, card.number or card.color)
@@ -165,93 +170,62 @@ class Strategy22:
             other_player_numbers = set(card.number for card in other_player.cards)
             old_probabilities = self.compute_probabilities_of_match(playable_cards, other_player.guesses)
 
-
             # compute info gain for all cards and colors
             for color_info in other_player_colors:
                 cloned_guesses = [guess.clone() for guess in other_player.guesses]
-                for card, guess in reversed(zip(other_player.cards, cloned_guesses)):
+                for card, guess in zip(other_player.cards, cloned_guesses):
                     if card.color == color_info:
                         guess.setIsColor(color_info)
                     else:
                         guess.setIsNotColor(color_info)
 
                 new_probabilities = self.compute_probabilities_of_match(playable_cards, cloned_guesses)
-                info_map1[(other_player.index, color_info)] = sum(new_probabilities)
-                info_map2[sum(new_probabilities)] = (other_player.index, color_info)
-                info_map3[max(new_probabilities)] = (other_player.index, color_info)
-                info_map4[max(new_probabilities) - max(old_probabilities)] = (other_player.index, color_info)
+                info_map4[max(new_probabilities) - max(old_probabilities)].append((other_player.index, color_info))
 
-                info_gain = 0
-                for i, p in enumerate(old_probabilities):
-                    g = other_player.guesses[i]
-                    if len(g.possible_colors) == 1 or len(g.possible_numbers) == 1:
-                        continue
-
-                    info_gain += (new_probabilities[i] - p)
-
-                info_map5[sum(new_probabilities) - sum(old_probabilities)].append((other_player.index, color_info))
-            # info_map5[info_gain] = (other_player.index, color_info)
             for number_info in other_player_numbers:
                 cloned_guesses = [guess.clone() for guess in other_player.guesses]
-                for card, guess in reversed(zip(other_player.cards, cloned_guesses)):
+                for card, guess in zip(other_player.cards, cloned_guesses):
                     if card.number == number_info:
                         guess.setIsNumber(number_info)
                     else:
                         guess.setIsNotNumber(number_info)
 
                 new_probabilities = self.compute_probabilities_of_match(playable_cards, cloned_guesses)
-                dbg1[(other_player.index, number_info)] = (cloned_guesses, new_probabilities)
-                info_map1[(other_player.index, number_info)] = sum(new_probabilities)
-                info_map2[sum(new_probabilities)] = (other_player.index, number_info)
-                info_map3[max(new_probabilities)] = (other_player.index, number_info)
-                info_map4[max(new_probabilities) - max(old_probabilities)] = (other_player.index, number_info)
 
-                info_gain = 0
-                for i, p in enumerate(old_probabilities):
-                    g = other_player.guesses[i]
-                    if len(g.possible_colors) == 1 or len(g.possible_numbers) == 1:
-                        continue
+                info_map4[max(new_probabilities) - max(old_probabilities)].append((other_player.index, number_info))
 
-                    info_gain += (new_probabilities[i] - p)
-
-
-
+        print "give other info?"
+        for k,v in info_map4.iteritems():
+            print k, v
 
         #######################################################################
         # Tell someone else about their cards
         #######################################################################
-        # if table.num_clock_tokens > 0:
-        # if len(info_gain_playable) > 0:
-        # 		playable_max = max(info_gain_playable.keys())
-        # 		return "say", info_gain_playable[playable_max][0]
-        # 	elif len(fives) > 0:
-        # 		return "say", fives[0]
-        # 	elif table.num_clock_tokens > 2 and len(info_gain_non_playable) > 0:
-        # 		playable_max = max(info_gain_non_playable.keys())
-        # 		return "say", info_gain_non_playable[playable_max][0]
-        print "info_map2", info_map2
-        print "info_map3", info_map3
-        print "info_map4", info_map4
         if table.num_clock_tokens > 0:
-            max_probability2 = max(info_map2.keys())
-            max_probability3 = max(info_map3.keys())
             max_probability4 = max(info_map4.keys())
-            max_probability5 = max(info_map5.keys())
-            # if max_probability3 >= self.play_risk:
-            if max_probability5 >= 0.0:
+            if max_probability4 > 0.0:
                 # for info in info_map5[max_probability5]:
                 # return "say", info_map2[max_probability2]
-                return "say", info_map4[max_probability4]
+                possible_info = info_map4[max_probability4]
+                total_players = len(other_players) + 1
+
+                possible_info_distance_to_cur = [(a - player_num if a > player_num else a + (total_players - player_num),b)
+                                                 for a,b in possible_info]
+
+                p, info = sorted(possible_info_distance_to_cur)[0]
+                print "sorted distances to cur", sorted(possible_info_distance_to_cur)
+                p = (player_num + p) % total_players
+                return "say", (p, info)
+
             # return "say", info_map2[max_probability]
 
         #######################################################################
         # Discard the oldest cars
         #######################################################################
-        possible_discard_indices = range(len(player_guesses))
-        # for i, colors_for_guess, numbers_for_guess in guess_list:
-        # 	if numbers_for_guess[0] == 5 and len(possible_discard_indices) > 0:
-        # 		del possible_discard_indices[i]
-        return "discard", possible_discard_indices[-1]
+
+        print "discard?", probabilities_possible_match
+        min_prob = min(probabilities_possible_match )
+        return "discard", probabilities_possible_match.index(min_prob)
 
 
 class Strategy1:
