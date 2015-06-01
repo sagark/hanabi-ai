@@ -16,13 +16,15 @@ class Guess:
         self.possible_numbers = possible_numbers if possible_numbers else list(set(HANABI_SUIT))
 
     def setIsColor(self, color):
-        self.possible_colors = [color]
+        if color in self.possible_colors:
+            self.possible_colors = [color]
 
     def setIsNotColor(self, color):
         self.possible_colors = [c for c in self.possible_colors if c != color]
 
     def setIsNumber(self, number):
-        self.possible_numbers = [number]
+        if number in self.possible_numbers:
+            self.possible_numbers = [number]
 
     def setIsNotNumber(self, number):
         self.possible_numbers = [n for n in self.possible_numbers if n != number]

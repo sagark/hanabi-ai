@@ -6,7 +6,6 @@ import argparse
 import sys
 
 from strategies.interactive_strategy import  *
-from strategies.strategy_1 import *
 from strategies.strategy_22 import *
 
 from game import Game
@@ -44,7 +43,7 @@ if __name__ == '__main__':
     args = parser.parse_args(sys.argv[1:])
 
 
-    strategy = Strategy22(0.9)
+    strategy = Strategy22(0.7)
     if args.test:
         testStrategy(strategy)
     else:
