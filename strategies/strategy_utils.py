@@ -1,5 +1,4 @@
 __author__ = 'julenka'
-import numpy as np
 from collections import defaultdict
 # input: playable_cards, player_guesses
 # return: probabilities of match

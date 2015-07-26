@@ -37,12 +37,12 @@ class Game:
 
         self.table.num_clock_tokens -= 1
 
-    def doTurn(self):
+    def _do_turn(self):
         if self.strategy is None:
             raise Exception("doTurn called but no player strategy specified")
         # do the turn
         other_players = [p for i,p in enumerate(self.players) if i != self.cur_player]
-        method, params = self.strategy.doTurn(self.cur_player, self.players[self.cur_player].guesses,
+        method, params = self.strategy.do_turn(self.cur_player, self.players[self.cur_player].guesses,
             other_players, self.table, logger)
         cur_player_object = self.players[self.cur_player]
 
@@ -79,8 +79,8 @@ class Game:
         self.cur_player += 1
         self.cur_player %= len(self.players)
 
-    def isGameOver(self):
-        ''' Check whether game is over
+    def _is_game_over(self):
+        """ Check whether game is over
 
         Ways game can be over:
         deck is empty and n_players moves have been executed
@@ -88,7 +88,7 @@ class Game:
 
         Returns:
         None if game is not over
-        String explaining game over reason is over'''
+        String explaining game over reason is over"""
         self.gameOverReason = None
         if self.num_turns_left is not None and self.num_turns_left == 0:
             self.gameOverReason = "Deck is empty and out of turns"
@@ -100,13 +100,13 @@ class Game:
             self.gameOverReason = "****YOU GOT A PERFECT SCORE****"
         return self.gameOverReason
 
-    def doGameOver(self):
-        self.printHeader("Game Over")
+    def _game_over(self):
+        self._print_header("Game Over")
         print "reason: {}".format(self.gameOverReason)
         print
         print
 
-    def printHeader(self, header):
+    def _print_header(self, header):
         separator = "*" * 20
         print
         print separator
@@ -114,36 +114,36 @@ class Game:
         print separator
 
     def show(self):
-        self.printHeader("players")
+        self._print_header("players")
         for p in self.players:
             print str(p)
         print
         print "Current Player: player {}".format(self.cur_player)
 
-        self.printHeader("deck")
+        self._print_header("deck")
         print self.deck
 
-        self.printHeader("table")
+        self._print_header("table")
         self.table.show()
 
-    def playEntireGame(self):
-        ''' Plays the entire game assuming a strategy is set
+    def play(self):
+        """ Plays the entire game assuming a strategy is set
 
         1. Check if strategy is set
         2. Loop and play game until game is over
-        '''
+        """
         if not self.strategy:
             raise Exception ("playEntireGame called but no strategy was set!")
 
-        while (not self.isGameOver()):
+        while (not self._is_game_over()):
             if self.interactive:
                 self.show()
                 print "Press enter to view action..."
                 raw_input()
-            self.doTurn()
+            self._do_turn()
             if self.interactive:
                 print
                 print "Press enter to view new state..."
                 raw_input()
-        self.doGameOver()
+        self._game_over()
         return self.table.getScore()

@@ -1,16 +1,16 @@
-from collections import defaultdict
-
 __author__ = 'julenka'
+
+import strategy_base
 import strategy_utils
-import numpy as np
-from log import logger
-class Strategy22:
+
+
+class Strategy22(strategy_base.Strategy):
     def __init__(self, play_risk):
         self.play_risk = play_risk
 
     ''' A strategy which always plays the zeroth card in its hand '''
 
-    def doTurn(self, player_num, player_guesses, other_players, table, logger):
+    def do_turn(self, player_num, player_guesses, other_players, table, logger):
         #######################################################################
         # Check if you can play a card
         #######################################################################
@@ -26,11 +26,6 @@ class Strategy22:
 
         if max_prob >= self.play_risk:
             return "play", probabilities_of_match.index(max_prob)
-
-        # if 0.0 in probabilities_of_match:
-        #     logger.debug("0 in probabilities of match!!!!")
-        #     return "discard", probabilities_of_match.index(0.0)
-
 
         #######################################################################
         # Tell someone else about their cards

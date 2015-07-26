@@ -1,10 +1,15 @@
-import re
-
 __author__ = 'julenka'
 
+import re
 
-class InteractiveStrategy:
-    def doTurn(self, player_num, player_guesses, other_players, table, logger):
+import strategy_base
+
+
+class InteractiveStrategy(strategy_base.Strategy):
+    def __init__(self):
+        pass
+
+    def do_turn(self, player_num, player_guesses, other_players, table, logger):
         ''' Perform a single turn
 
         Params:

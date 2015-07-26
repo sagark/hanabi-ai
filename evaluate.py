@@ -15,7 +15,7 @@ from game import Game
 def test_strategy(s):
     game = Game(3, interactive=True)
     game.strategy = s
-    score = game.playEntireGame()
+    score = game.play()
     print "final score: ", str(score)
 
 
@@ -24,7 +24,7 @@ def evaluate_strategy(s, n_players, evaluation_times):
     for i in xrange(evaluation_times):
         game = Game(n_players)
         game.strategy = s
-        score = game.playEntireGame()
+        score = game.play()
         scores.append(score)
     return scores
 
