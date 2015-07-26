@@ -3,10 +3,10 @@
 __author__ = 'julenka'
 
 import argparse
+import datetime
 import sys
 
 import matplotlib.pyplot as plt
-import numpy as np
 
 from strategies.strategy_22 import *
 from game import Game
@@ -27,10 +27,6 @@ def evaluate_strategy(s, n_players, evaluation_times):
         score = game.playEntireGame()
         scores.append(score)
     return scores
-
-
-import datetime
-
 
 def plot_scores(scores):
     plt.hist(scores)
