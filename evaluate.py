@@ -1,64 +1,60 @@
-from strategies import strategy_22
+#!/usr/bin/env python
 
 __author__ = 'julenka'
 
 import argparse
 import sys
 
-from strategies.interactive_strategy import  *
-from strategies.strategy_22 import *
-
-from game import Game
-
 import matplotlib.pyplot as plt
 import numpy as np
 
-def testStrategy(strategy):
-    # game loop:
+from strategies.strategy_22 import *
+from game import Game
+
+
+def test_strategy(s):
     game = Game(3, interactive=True)
-    game.strategy = strategy
+    game.strategy = s
     score = game.playEntireGame()
     print "final score: ", str(score)
 
-def evaluateStrategy(strategy, n_players, evaluation_times, show_hist=False):
 
+def evaluate_strategy(s, n_players, evaluation_times):
     scores = []
     for i in xrange(evaluation_times):
         game = Game(n_players)
-        game.strategy = strategy
+        game.strategy = s
         score = game.playEntireGame()
         scores.append(score)
-
-    if(show_hist):
-        bins = np.linspace(0,25,26)
-        plt.hist(scores, bins)
-        plt.show()
     return scores
 
-if __name__ == '__main__':
+
+import datetime
+
+
+def plot_scores(scores):
+    plt.hist(scores)
+    now = datetime.datetime.now()
+    plt.title("{}\nmean = {}".format(now.strftime("%B %d, %Y"), np.mean(scores)))
+    plt.show()
+
+
+def main(argv):
     parser = argparse.ArgumentParser("evaluate a strategy")
     parser.add_argument("--test", action="store_true")
     parser.add_argument("-n", "--n-players", type=int, default=3, help="number of players")
     parser.add_argument("-r", "--runs", type=int, default=20, help="number of runs to evaluate")
-    args = parser.parse_args(sys.argv[1:])
-
+    parser.add_argument("--plot", action="store_true", help="plot the results of runs")
+    args = parser.parse_args(argv)
 
     strategy = Strategy22(0.7)
     if args.test:
-        testStrategy(strategy)
+        test_strategy(strategy)
     else:
-        scores = evaluateStrategy(strategy, args.n_players, args.runs)
+        scores = evaluate_strategy(strategy, args.n_players, args.runs)
         print np.mean(scores)
-# testStrategy(InteractiveStrategy())
-# testStrategy(PlayZerothStrategy())
+        if args.plot:
+            plot_scores(scores)
 
-# evaluateStrategy(Strategy22(0.7),3)
-
-# mean_scores = []
-# for i in xrange(10, 101, 10):
-# 	probability = i/100.0
-# 	scores = evaluateStrategy(Strategy1(probability), 3)
-# 	mean_scores.append((probability, np.mean(scores)))
-
-# print mean_scores
-
+if __name__ == '__main__':
+    main(sys.argv[1:])
