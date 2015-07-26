@@ -37,7 +37,6 @@ class Game:
 
         self.table.num_clock_tokens -= 1
 
-
     def doTurn(self):
         if self.strategy is None:
             raise Exception("doTurn called but no player strategy specified")
@@ -68,7 +67,6 @@ class Game:
             self.say(idx, arg)
         else:
             raise Exception("Invalid command retured from strategy.doTurn: {}", command)
-
 
         # current player draw card
         # check if deck is empty, if so, don't draw, instead start countdown
@@ -127,8 +125,6 @@ class Game:
 
         self.printHeader("table")
         self.table.show()
-
-
 
     def playEntireGame(self):
         ''' Plays the entire game assuming a strategy is set

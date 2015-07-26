@@ -3,8 +3,6 @@
 """ Simulates a game of hanabi, allowing for experimentation of different hanabi strategies assuming perfect memory """
 
 
-# TODO: MAKE COLORS AND MOVES ENUMS OR CONSTANTS
-
 # Globals specific to game
 HANABI_COLORS = ["red", "blue", "green", "yellow", "white"]
 HANABI_SUIT = [1,1,1,2,2,3,3,4,4,5]
