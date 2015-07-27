@@ -1,4 +1,5 @@
 import random
+
 from card import Card
 from constants import HANABI_COLORS, HANABI_SUIT
 
@@ -15,16 +16,15 @@ class Deck:
                 self.cards.append(Card(color, number))
         random.shuffle(self.cards)
 
-    def drawCard(self):
+    def _draw_card(self):
         """ Returns a card from the top of the deck
 
         Returns
         card
         """
-        return self.drawCards(1)[0]
+        return self.draw_cards(1)[0]
 
-
-    def drawCards(self,n):
+    def draw_cards(self, n):
         """ Draw n cards from the top of the deck
 
         Returns:

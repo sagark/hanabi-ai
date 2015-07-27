@@ -6,6 +6,8 @@ import argparse
 import datetime
 import sys
 
+import numpy as np
+
 import matplotlib.pyplot as plt
 
 from strategies.strategy_22 import *

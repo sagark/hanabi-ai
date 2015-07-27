@@ -14,12 +14,12 @@ class Table:
         self.num_clock_tokens = num_clock_tokens
         self.discard_pile = [] if not discard_pile else discard_pile
 
-    def playCard(self, card):
+    def play_card(self, card):
         """ Plays a card on the table, assuming it is valid.
 
         If not valid, throw exception
         """
-        if not self.canPlayCard(card):
+        if not self.can_play_card(card):
             self.num_fuse_tokens -= 1
             logger.debug("***BOOM*** Booms left: {}".format(self.num_fuse_tokens))
             self.discard(card)
@@ -31,12 +31,11 @@ class Table:
 
                 logger.debug("***HANABI!!!*** {} clock tokens".format(self.num_clock_tokens))
 
-
-    def canPlayCard(self, card):
-        playable_cards = self.getPlayableCards()
+    def can_play_card(self, card):
+        playable_cards = self.get_playable_cards()
         return card in playable_cards
 
-    def getPlayableCards(self):
+    def get_playable_cards(self):
         playable_cards = []
         for color, cards in self.cards_on_table.iteritems():
             if len(cards) >= N_CARDS_PER_SUIT:
@@ -49,7 +48,7 @@ class Table:
         self.discard_pile.append(card)
         self.num_clock_tokens += 1
 
-    def getScore(self):
+    def get_score(self):
         numbers_for_colors = ([c.number for c in cards] for cards in self.cards_on_table.values())
         return sum((max(x) if len(x) > 0 else 0 for x in numbers_for_colors))
 

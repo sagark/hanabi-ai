@@ -16,7 +16,7 @@ class Strategy22(strategy_base.Strategy):
         #######################################################################
 
         # playable cards: [Card(color, number), Card(color, number)]
-        playable_cards = table.getPlayableCards()
+        playable_cards = table.get_playable_cards()
 
         # for each guess, stores the probability of a match
         probabilities_of_match = strategy_utils.compute_probabilities_of_match(playable_cards, player_guesses)

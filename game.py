@@ -26,14 +26,14 @@ class Game:
         self.table = Table()
         self.num_turns_left = None
         for i in xrange(n_players):
-            self.players.append(Player(self.deck.drawCards(CARDS_PER_PLAYER[n_players]), "player {}".format(i), i ))
+            self.players.append(Player(self.deck.draw_cards(CARDS_PER_PLAYER[n_players]), "player {}".format(i), i))
 
     def say(self, idx, param):
         try:
             number = int(param)
-            self.players[idx].receiveNumberInfo(number)
+            self.players[idx].receive_number_info(number)
         except ValueError:
-            self.players[idx].receiveColorInfo(param)
+            self.players[idx].receive_color_info(param)
 
         self.table.num_clock_tokens -= 1
 
@@ -50,12 +50,12 @@ class Game:
             idx = int(params)
             logger.debug("{} discarding {}".format(cur_player_object.name, cur_player_object.cards[idx]))
             cur_player_object.discard(idx, self.table)
-            cur_player_object.drawCard(self.deck)
+            cur_player_object.draw_card(self.deck)
         elif method == "play":
             idx = int(params)
             logger.debug("{} playing {}".format(cur_player_object.name, cur_player_object.cards[idx]))
             cur_player_object.play(idx, self.table)
-            cur_player_object.drawCard(self.deck)
+            cur_player_object.draw_card(self.deck)
         elif method.startswith("say"):
             idx,arg = params
             if self.table.num_clock_tokens == 0:
@@ -96,7 +96,7 @@ class Game:
             self.gameOverReason = "Tried to use information when no information was left"
         if self.table.num_fuse_tokens <= 0:
             self.gameOverReason = "Explosion when no fuse tokens left"
-        if len(self.table.getPlayableCards()) == 0:
+        if len(self.table.get_playable_cards()) == 0:
             self.gameOverReason = "****YOU GOT A PERFECT SCORE****"
         return self.gameOverReason
 
@@ -146,4 +146,4 @@ class Game:
                 print "Press enter to view new state..."
                 raw_input()
         self._game_over()
-        return self.table.getScore()
+        return self.table.get_score()

@@ -43,14 +43,14 @@ def get_info_gain_for_action(other_players, playable_cards, risk):
             for card, guess in zip(other_player.cards, cloned_guesses):
                 if isinstance(info, str):
                     if card.color == info:
-                        guess.setIsColor(info)
+                        guess.set_is_color(info)
                     else:
-                        guess.setIsNotColor(info)
+                        guess.set_is_not_color(info)
                 else:
                     if card.number == info:
-                        guess.setIsNumber(info)
+                        guess.set_is_number(info)
                     else:
-                        guess.setIsNotNumber(info)
+                        guess.set_is_not_number(info)
 
             new_probabilities = compute_probabilities_of_match(playable_cards, cloned_guesses)
 
