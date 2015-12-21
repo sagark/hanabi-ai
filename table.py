@@ -6,8 +6,11 @@ __author__ = 'julenka'
 
 class Table:
     """ Represents the game table, e.g. the area where cards are played """
-    def __init__(self, cards_on_table=None,num_fuse_tokens=INITIAL_NUM_FUSE_TOKENS,
-        num_clock_tokens=INITIAL_NUM_CLOCK_TOKENS,discard_pile=None):
+    def __init__(self,
+                 cards_on_table=None,
+                 num_fuse_tokens=INITIAL_NUM_FUSE_TOKENS,
+                 num_clock_tokens=INITIAL_NUM_CLOCK_TOKENS,
+                 discard_pile=None):
         # data is a map from color -> cards
         self.cards_on_table = {c: [] for c in HANABI_COLORS}
         self.num_fuse_tokens = num_fuse_tokens
@@ -60,7 +63,6 @@ class Table:
         print "fuse tokens left: ", self.num_fuse_tokens
         print "information tokens left: ", self.num_clock_tokens
         print
-        row_string = ""
         for color, cards in self.cards_on_table.iteritems():
             row_string = color + ":"
             for card in cards:

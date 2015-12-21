@@ -19,7 +19,7 @@ class Deck:
     def _draw_card(self):
         """ Returns a card from the top of the deck
 
-        Returns
+        Returns:
         card
         """
         return self.draw_cards(1)[0]
@@ -31,7 +31,7 @@ class Deck:
         [card1, card2, ... , cardn]
         """
         if n > len(self.cards):
-            raise Exception("drawCards({}) called when only {} cards in deck".format(n, len(self.cards) ))
+            raise Exception("drawCards({}) called when only {} cards in deck".format(n, len(self.cards)))
         if n < 0:
             raise Exception("drawCards({}) can't use negative number".format(n))
         result = self.cards[-n:]
@@ -41,7 +41,7 @@ class Deck:
     def size(self):
         return len(self.cards)
 
-    def isEmpty(self):
+    def is_empty(self):
         return len(self.cards) == 0
 
     def __str__(self):

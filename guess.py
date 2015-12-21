@@ -12,7 +12,7 @@ class Guess:
     """
     def __init__(self, possible_colors=None, possible_numbers=None):
         self.possible_colors = possible_colors if possible_colors else HANABI_COLORS
-        # WARNING: CODE DUMPLICATION
+        # WARNING: CODE DUPLICATION
         self.possible_numbers = possible_numbers if possible_numbers else list(set(HANABI_SUIT))
 
     def set_is_color(self, color):

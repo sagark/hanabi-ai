@@ -6,15 +6,13 @@ __author__ = 'julenka'
 class Player:
     """ A player in Hanabi """
     def __init__(self, cards, name, index):
-        # cards in hand
         self.cards = cards
-        # guesses about cards
         self.guesses = [Guess() for c in self.cards]
         self.name = name
         self.index = index
 
     def play(self, i, t):
-        ''' Play a card at index i on table t'''
+        """Play a card at index i on table t"""
         t.play_card(self.cards[i])
         self.remove_card(i)
 
@@ -31,7 +29,7 @@ class Player:
         return [i for i, card in enumerate(self.cards) if table.can_play_card(card)]
 
     def draw_card(self, deck):
-        if not deck.isEmpty() > 0:
+        if not deck.is_empty() > 0:
             self.cards.append(deck._draw_card())
             self.guesses.append(Guess())
 
