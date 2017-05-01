@@ -24,12 +24,12 @@ def test_strategy(s, n_players):
     game = Game(n_players, interactive=True)
     game.strategy = s
     score = game.play()
-    print "final score: ", str(score)
+    print("final score: ", str(score))
 
 
 def evaluate_strategy(s, n_players, evaluation_times):
     scores = []
-    for i in xrange(evaluation_times):
+    for i in range(evaluation_times):
         game = Game(n_players)
         game.strategy = s
         score = game.play()
@@ -44,7 +44,7 @@ def plot_scores(scores):
     plt.cla()
 
 def print_results(scores):
-    print("mean score: {}".format(np.mean(scores)))
+    print(("mean score: {}".format(np.mean(scores))))
 
 def main(argv):
     parser = argparse.ArgumentParser("Evaluate a strategy")

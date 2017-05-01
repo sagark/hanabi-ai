@@ -1,7 +1,7 @@
 __author__ = 'julenka'
 
-import strategy_base
-import strategy_utils
+from . import strategy_base
+from . import strategy_utils
 
 
 class Strategy22(strategy_base.Strategy):
@@ -41,8 +41,7 @@ class Strategy22(strategy_base.Strategy):
 
                 possible_info_distance_to_cur = [(a - player_num if a > player_num else a + (total_players - player_num),b)
                                                  for a,b in possible_info]
-
-                p, info = sorted(possible_info_distance_to_cur)[0]
+                p, info = sorted(possible_info_distance_to_cur, key=lambda tup: tup[0])[0]
                 p = (player_num + p) % total_players
                 return "say", (p, info)
 

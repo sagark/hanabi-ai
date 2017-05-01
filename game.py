@@ -27,7 +27,7 @@ class Game:
 
         self.table = Table()
         self.num_turns_left = None
-        for i in xrange(n_players):
+        for i in range(n_players):
             self.players.append(Player(self.deck.draw_cards(CARDS_PER_PLAYER[n_players]), "player {}".format(i), i))
 
     def say(self, idx, param):
@@ -125,9 +125,9 @@ class Game:
         :return:
         """
         self._print_header("Game Over")
-        print "reason: {}".format(self.gameOverReason)
-        print
-        print
+        print("reason: {}".format(self.gameOverReason))
+        print()
+        print()
 
     def _print_header(self, header):
         """ Print a header message
@@ -136,10 +136,10 @@ class Game:
         :return:
         """
         separator = "*" * 20
-        print
-        print separator
-        print header
-        print separator
+        print()
+        print(separator)
+        print(header)
+        print(separator)
 
     def show(self):
         """ Print the state of the game to the console
@@ -149,12 +149,12 @@ class Game:
         self._print_header("Current Player: {}".format(self.cur_player))
         self._print_header("Players")
         for p in self.players:
-            print str(p)
-            print
-        print
+            print(str(p))
+            print()
+        print()
 
         self._print_header("Deck")
-        print self.deck
+        print(self.deck)
 
         self._print_header("Table")
         self.table.show()
@@ -171,15 +171,15 @@ class Game:
         while not self._is_game_over():
             if self.interactive:
                 self.show()
-                print "Press enter to view action, or q to quit..."
-                user_input = raw_input()
+                print("Press enter to view action, or q to quit...")
+                user_input = input()
                 if user_input == "q":
                     import sys
                     sys.exit(1)
             self._do_turn()
             if self.interactive:
-                print
-                print "Press enter to view new state..."
-                raw_input()
+                print()
+                print("Press enter to view new state...")
+                input()
         self._game_over()
         return self.table.get_score()

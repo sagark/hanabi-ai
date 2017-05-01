@@ -2,7 +2,7 @@ __author__ = 'julenka'
 
 import re
 
-import strategy_base
+from . import strategy_base
 
 
 class InteractiveStrategy(strategy_base.Strategy):
@@ -36,16 +36,16 @@ class InteractiveStrategy(strategy_base.Strategy):
         play(index)
         '''
 
-        print "type in a move in format command(args)"
-        print "your move, player {}:".format(player_num)
+        print("type in a move in format command(args)")
+        print("your move, player {}:".format(player_num))
         commands = ["sayColor", "sayNumber", "discard", "play", "say"]
         validPlay = False
         errorMessage = None
         while not validPlay:
             validPlay = True
             if errorMessage:
-                print errorMessage
-            action = raw_input()
+                print(errorMessage)
+            action = input()
             match = re.match(r"(.+)\((.+)\)", action)
             if not match:
                 validPlay = False

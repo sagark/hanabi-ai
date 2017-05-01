@@ -56,6 +56,6 @@ class Player:
     def __str__(self):
         # on each line, print the actual card and guess for that card
         lines = ["{}\t{}".format(card, guess) for card, guess in zip(self.cards, self.guesses) ]
-        print self.name
-        print "card\tpossible_colors\tpossible_numbers"
+        print(self.name)
+        print("card\tpossible_colors\tpossible_numbers")
         return "\n".join(lines)

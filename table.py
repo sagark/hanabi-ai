@@ -40,7 +40,7 @@ class Table:
 
     def get_playable_cards(self):
         playable_cards = []
-        for color, cards in self.cards_on_table.iteritems():
+        for color, cards in self.cards_on_table.items():
             if len(cards) >= N_CARDS_PER_SUIT:
                 continue
             next_number = len(cards) + 1
@@ -52,7 +52,7 @@ class Table:
         self.num_clock_tokens += 1
 
     def get_score(self):
-        numbers_for_colors = ([c.number for c in cards] for cards in self.cards_on_table.values())
+        numbers_for_colors = ([c.number for c in cards] for cards in list(self.cards_on_table.values()))
         return sum((max(x) if len(x) > 0 else 0 for x in numbers_for_colors))
 
     def __repr__(self):
@@ -60,13 +60,13 @@ class Table:
             self.num_clock_tokens, self.discard_pile)
 
     def show(self):
-        print "fuse tokens left: ", self.num_fuse_tokens
-        print "information tokens left: ", self.num_clock_tokens
-        print
-        for color, cards in self.cards_on_table.iteritems():
+        print("fuse tokens left: ", self.num_fuse_tokens)
+        print("information tokens left: ", self.num_clock_tokens)
+        print()
+        for color, cards in self.cards_on_table.items():
             row_string = color + ":"
             for card in cards:
                 row_string += "\t{}".format(card.number)
             if len(cards) == 0:
                 row_string += "\tempty"
-            print row_string
+            print(row_string)
