@@ -10,6 +10,8 @@ import sys
 
 import numpy as np
 
+import matplotlib
+matplotlib.use('agg')
 import matplotlib.pyplot as plt
 
 from strategies.strategy_22 import *
@@ -38,7 +40,8 @@ def plot_scores(scores):
     plt.hist(scores)
     now = datetime.datetime.now()
     plt.title("{}\nmean = {}".format(now.strftime("%B %d, %Y"), np.mean(scores)))
-    plt.show()
+    plt.savefig('evaluationplot.png')
+    plt.cla()
 
 def print_results(scores):
     print("mean score: {}".format(np.mean(scores)))
